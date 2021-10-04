@@ -9,7 +9,7 @@ inputs:
         required: true
     numOfAssignee:
         description: 'Number of assignee'
-        required: true
+        required: false
 
 runs:
     using: 'node12'

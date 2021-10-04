@@ -3,7 +3,7 @@ const github = require('@actions/github');
 
 const pickRandomFromArray = (arr) => {
     if (arr.length === 0) {
-      throw new Error('Internal error: cannot pick random from empty list.')
+      throw new Error('Can not pick random from empty list.')
     }
 
     return arr[Math.floor(Math.random() * arr.length)]
@@ -33,15 +33,18 @@ const run = async () => {
 
     // Get issue assignees
     const assigneesString = core.getInput('assignees', { required: true });
-    const assigneePool = assigneesString
+    let assignees = assigneesString
         .split(',')
         .map((assigneeName) => assigneeName.trim());
 
-    const numOfAssignee = core.getInput('numOfAssignee', { require: true });
-    if (numOfAssignee < 1) {
-        throw new Error(`Invalid numOfAssignee`);
+    const numOfAssigneeString = core.getInput('numOfAssignee', { require: false });
+    if (numOfAssigneeString) {
+        const numOfAssignee = parseInt(numOfAssigneeString, 10);
+        if (isNaN(numOfAssignee)) {
+            throw new Error(`Invalid numOfAssignee`);
+        }
+        assignees = pickNRandomFromArray(assignees, numOfAssignee);
     }
-    const assignees = pickNRandomFromArray(assigneePool, numOfAssignee);
 
     // Assign issue
     console.log(

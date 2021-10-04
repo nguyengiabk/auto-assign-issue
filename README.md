@@ -5,7 +5,7 @@
 | Parameter       | Required | Description                                                                |
 | --------------- | -------- | ---------------------------------------------------------------------------|
 | `assignees`     | true     | Comma separated list of user names. Issue will be assigned to those users. |
-| `numOfAssignee` | true     | Number of required assignee.                                               |
+| `numOfAssignee` | false    | Number of required assignee. Assign all users if not set.                  |
 
 ## Example usage
 
@@ -25,7 +25,7 @@ jobs:
             - name: 'Auto-assign issue'
               uses: pozil/auto-assign-issue@v1
               with:
-                  assignees: octocat,neko,inu
+                  assignees: octocat,cat,dog
                   numOfAssignee: 1
 ```
 
