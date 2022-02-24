@@ -1,15 +1,42 @@
 on:
-    issues:
-        types: [opened]
-
+  issues:
+    types: [opened]
+name: Issue auto assignment
 jobs:
-    auto-assign:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v2
-            - name: 'Auto-assign issue'
-              uses: ./
-              with:
-                  assignees: octocat,nguyengiabk
-                  numOfAssignee: 1
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve last_assignee_index artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: last_assignee_index
+      - name: pass last_assignee_index artifact
+        if: always()
+        run: |
+          LAST_ASSIGNEE_INDEX=`cat last_assignee_index`
+          echo "LAST_ASSIGNEE_INDEX=$LAST_ASSIGNEE_INDEX" >> $GITHUB_ENV
+      - name: Determine assignee
+        if: always()
+        run: |
+          TEAM=("octocat" "nguyengiabk")
+          LENGTH=${#TEAM[@]}
+          LAST_ASSIGNEE_INDEX=$(((LAST_ASSIGNEE_INDEX+1)%LENGTH))
+          echo "LAST_ASSIGNEE_INDEX=$LAST_ASSIGNEE_INDEX" >> $GITHUB_ENV
+          echo $LAST_ASSIGNEE_INDEX > last_assignee_index
+          ASSIGNEE=${TEAM[LAST_ASSIGNEE_INDEX]}
+          echo "ASSIGNEE=$ASSIGNEE" >> $GITHUB_ENV
+      - name: Debug output
+        if: always()
+        run: echo "Assignee is  ${{ env.ASSIGNEE }}"
+      - name: 'Auto-assign issue'
+        if: always()
+        uses: pozil/auto-assign-issue@v1.1.0
+        with:
+          assignees: ${{ env.ASSIGNEE }}
+          numOfAssignee: 1
+      - name: Persit LAST_ASSIGNEE_INDEX for next job
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: last_assignee_index
+          path: output/test/code-coverage.html
